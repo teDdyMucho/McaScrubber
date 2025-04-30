@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Officer Portal - Merchant Cash Advance</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Loan Officer Portal</h1>
+            <h2>Merchant Cash Advance Specialist</h2>
+        </header>
+        
+        <main>
+            <section class="upload-section">
+                <h3>Upload Screenshots or PDFs</h3>
+                <p class="instruction">Take a screenshot using <kbd>Win</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>, then paste or upload it below. You can also upload PDF files.</p>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-prompt">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2NjY2NjYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjEgMTVsLTUtNS01IDUiLz48cGF0aCBkPSJNMTYgMTB2OGE0IDQgMCAwMS00IDRINmE0IDQgMCAwMS00LTR2LTEiLz48L3N2Zz4=" alt="Upload Icon">
+                        <p>Paste screenshot or click to upload images/PDFs</p>
+                    </div>
+                    <input type="file" id="fileInput" multiple accept="image/*,application/pdf" class="file-input">
+                </div>
+                
+                <div class="button-group">
+                    <button id="pasteButton" class="btn primary">Paste Screenshot</button>
+                    <button id="uploadButton" class="btn secondary">Upload Files</button>
+                </div>
+            </section>
+            
+            <section class="preview-section">
+                <h3>Screenshot Preview</h3>
+                <div id="imagePreviewContainer" class="image-preview-container">
+                    <p class="no-images">No screenshots uploaded yet</p>
+                </div>
+                
+                <div class="button-group">
+                    <button id="sendButton" class="btn primary" disabled>Send to n8n</button>
+                    <button id="clearButton" class="btn danger" disabled>Delete All</button>
+                </div>
+            </section>
+            
+            <section class="response-section">
+                <h3>Response</h3>
+                <div id="responseContainer" class="response-container">
+                    <p class="no-response">No response yet</p>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>&copy; 2025 Loan Officer Portal. All rights reserved.</p>
+        </footer>
+    </div>
+    
+    <!-- PDF.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+    <script>
+        // Set the PDF.js worker source
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    </script>
+    <script src="js/script.js"></script>
+</body>
+</html>
