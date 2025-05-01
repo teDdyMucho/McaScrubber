@@ -19,6 +19,19 @@
             <h2>Merchant Cash Advance Specialist</h2>
         </header>
         <button id="settingsButton" class="btn settings">Settings</button>
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span id="closeSettingsModal" class="close">&times;</span>
+                <h3>AI Prompt Settings</h3>
+                <label for="aiPromptInput">Custom AI Prompt:</label>
+                <input type="text" id="aiPromptInput" style="width:100%;margin-bottom:1rem;">
+                <div style="display:flex;justify-content:flex-end;gap:8px;">
+                    <button id="cancelAiPrompt" class="btn secondary">Cancel</button>
+                    <button id="saveAiPrompt" class="btn primary">Save</button>
+                </div>
+            </div>
+        </div>
         
         <main>
             <section class="upload-section">

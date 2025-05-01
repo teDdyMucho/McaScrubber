@@ -13,7 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadedImages = [];
     
     // Webhook URL for n8n
-    const webhookUrl = 'https://primary-production-166e.up.railway.app/webhook-test/75c06d22-e3bb-46b6-a96e-c16980992a38';
+    const originalWebhookUrl = 'https://primary-production-166e.up.railway.app/webhook-test/75c06d22-e3bb-46b6-a96e-c16980992a38';
+    // Use a CORS proxy to bypass CORS restrictions
+    const corsProxyUrl = 'https://corsproxy.io/?';
+    const webhookUrl = corsProxyUrl + encodeURIComponent(originalWebhookUrl);
     
     // Header Authentication credentials
     const authHeaders = {
@@ -257,10 +260,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Clone the authHeaders to avoid modifying the original
         const headers = { ...authHeaders };
         
+        // Add mode: 'cors' and credentials: 'omit' for CORS requests
         fetch(webhookUrl, {
             method: 'POST',
             headers: headers,
-            body: formData
+            body: formData,
+            mode: 'cors',
+            credentials: 'omit'
         })
         .then(response => {
             console.log('Response status:', response.status);
