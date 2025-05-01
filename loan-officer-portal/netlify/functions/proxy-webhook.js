@@ -17,7 +17,7 @@ exports.handler = async function(event, context) {
     const requestBody = JSON.parse(event.body);
     
     // The Railway webhook URL
-    const webhookUrl = 'https://primary-production-166e.up.railway.app/webhook-test/75c06d22-e3bb-46b6-a96e-c16980992a38';
+    const webhookUrl = 'https://primary-production-6722.up.railway.app/webhook-test/34315acb-a2fe-4d8f-9803-cdd663bf1625';
     
     // Forward the request to Railway
     const response = await fetch(webhookUrl, {

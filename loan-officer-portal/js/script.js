@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadedImages = [];
     
     // Direct URL to Railway backend
-    const webhookUrl = 'https://primary-production-166e.up.railway.app/webhook-test/75c06d22-e3bb-46b6-a96e-c16980992a38';
+    const webhookUrl = 'https://primary-production-6722.up.railway.app/webhook-test/34315acb-a2fe-4d8f-9803-cdd663bf1625';
     
     // Header Authentication credentials
     const authHeaders = {
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Get AI Prompt from localStorage
         const aiPrompt = localStorage.getItem('aiPrompt') || '';
         
-        // Prepare FormData for the request
+        // Prepare data for the request
         const formData = new FormData();
         formData.append('aiPrompt', aiPrompt);
         
@@ -252,38 +252,32 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append(`image_${index}`, blob, image.name || `screenshot_${index}.png`);
         });
         
-        // Use a reliable public CORS proxy
-        const corsProxyUrl = 'https://cors-anywhere.herokuapp.com/';
-        const proxyUrl = corsProxyUrl + webhookUrl;
+        // Show a message that we're sending the request
+        showResponse('Sending images to the server...', false);
         
-        // Send data through the CORS proxy
-        fetch(proxyUrl, {
+        // Use a direct fetch approach with proper headers
+        fetch(webhookUrl, {
             method: 'POST',
-            headers: authHeaders, // Don't set Content-Type with FormData
-            body: formData,
-            mode: 'cors'
+            headers: authHeaders,
+            body: formData
         })
         .then(response => {
             console.log('Response status:', response.status);
             console.log('Response headers:', [...response.headers.entries()]);
             
-            // Check if response is ok (status in the range 200-299)
             if (!response.ok) {
                 return response.text().then(text => {
                     throw new Error(`HTTP error ${response.status}: ${text}`);
                 });
             }
             
-            // Check if the response is JSON or text
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
                 return response.json().then(data => {
-                    console.log('Response data (JSON):', data);
                     return { isJson: true, data };
                 });
             } else {
                 return response.text().then(text => {
-                    console.log('Response data (Text):', text);
                     return { isJson: false, data: text };
                 });
             }
@@ -301,15 +295,20 @@ document.addEventListener('DOMContentLoaded', () => {
             showResponse(`Failed to send images to webhook: ${error.message}`, false);
             console.error('Error sending images to webhook:', error);
             
-            // Log request details for debugging
-            console.log('Request URL:', proxyUrl);
-            console.log('Request headers:', authHeaders);
-            console.log('FormData sent with images:', uploadedImages.length);
-            
             // Reset button state
             sendButton.disabled = false;
             sendButton.textContent = 'Send to n8n';
         });
+    }
+    
+    // Helper function to create response iframe
+    function createResponseIframe() {
+        const iframe = document.createElement('iframe');
+        iframe.id = 'responseIframe';
+        iframe.name = 'responseIframe';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+        return iframe;
     }
     
     function showResponse(data, isJson = true) {
