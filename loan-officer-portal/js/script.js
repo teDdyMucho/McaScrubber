@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadedImages = [];
     
     // Direct URL to Railway backend
-    const webhookUrl = 'https://primary-production-6722.up.railway.app/webhook-test/34315acb-a2fe-4d8f-9803-cdd663bf1625';
+    const webhookUrl = 'https://primary-production-6722.up.railway.app/webhook/34315acb-a2fe-4d8f-9803-cdd663bf1625';
     
     // Header Authentication credentials
     const authHeaders = {
