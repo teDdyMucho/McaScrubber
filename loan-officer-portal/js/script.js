@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Store uploaded images
     const uploadedImages = [];
     
-    // Use Netlify Function as a proxy to avoid CORS issues
-    const webhookUrl = '/.netlify/functions/proxy-webhook';
+    // Direct URL to Railway backend
+    const webhookUrl = 'https://primary-production-166e.up.railway.app/webhook-test/75c06d22-e3bb-46b6-a96e-c16980992a38';
     
     // Header Authentication credentials
     const authHeaders = {
@@ -232,28 +232,35 @@ document.addEventListener('DOMContentLoaded', () => {
         // Get AI Prompt from localStorage
         const aiPrompt = localStorage.getItem('aiPrompt') || '';
         
-        // Prepare JSON data instead of FormData
-        const jsonData = {
-            aiPrompt: aiPrompt,
-            images: uploadedImages.map((image, index) => ({
-                name: image.name || `screenshot_${index}.png`,
-                data: image.data,  // Already base64 encoded
-                type: image.data.split(',')[0].split(':')[1].split(';')[0]
-            }))
-        };
+        // Prepare FormData for the request
+        const formData = new FormData();
+        formData.append('aiPrompt', aiPrompt);
         
-        // Set up headers for JSON
-        const headers = { 
-            ...authHeaders,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        };
+        // Add each image to the form data
+        uploadedImages.forEach((image, index) => {
+            // Convert base64 to blob
+            const byteString = atob(image.data.split(',')[1]);
+            const mimeType = image.data.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            
+            const blob = new Blob([ab], { type: mimeType });
+            formData.append(`image_${index}`, blob, image.name || `screenshot_${index}.png`);
+        });
         
-        // Send JSON data to webhook
-        fetch(webhookUrl, {
+        // Use a reliable public CORS proxy
+        const corsProxyUrl = 'https://cors-anywhere.herokuapp.com/';
+        const proxyUrl = corsProxyUrl + webhookUrl;
+        
+        // Send data through the CORS proxy
+        fetch(proxyUrl, {
             method: 'POST',
-            headers: headers,
-            body: JSON.stringify(jsonData),
+            headers: authHeaders, // Don't set Content-Type with FormData
+            body: formData,
             mode: 'cors'
         })
         .then(response => {
@@ -295,9 +302,9 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error sending images to webhook:', error);
             
             // Log request details for debugging
-            console.log('Request URL:', webhookUrl);
-            console.log('Request headers:', headers);
-            console.log('JSON data:', jsonData);
+            console.log('Request URL:', proxyUrl);
+            console.log('Request headers:', authHeaders);
+            console.log('FormData sent with images:', uploadedImages.length);
             
             // Reset button state
             sendButton.disabled = false;
