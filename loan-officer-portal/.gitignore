@@ -1,0 +1,11 @@
+# Ignore node_modules and build output
+node_modules/
+dist/
+build/
+.DS_Store
+*.log
+.env
+# Ignore OS files
+Thumbs.db
+# Ignore deployment config if sensitive
+windsurf_deployment.yaml
