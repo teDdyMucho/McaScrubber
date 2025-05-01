@@ -1,8 +1,15 @@
 [build]
   publish = "/"
   command = ""
+  functions = "netlify/functions"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
+  status = 200
+
+# Redirect API requests to the serverless function
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
   status = 200

@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Store uploaded images
     const uploadedImages = [];
     
-    // Webhook URL for n8n
-    const webhookUrl = 'https://primary-production-166e.up.railway.app/webhook-test/75c06d22-e3bb-46b6-a96e-c16980992a38';
+    // Use Netlify Function as a proxy to avoid CORS issues
+    const webhookUrl = '/.netlify/functions/proxy-webhook';
     
     // Header Authentication credentials
     const authHeaders = {
@@ -297,13 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Log request details for debugging
             console.log('Request URL:', webhookUrl);
             console.log('Request headers:', headers);
-            console.log('FormData entries:', [...formData.entries()].map(entry => {
-                // Don't log the full blob data, just the name and type
-                if (entry[1] instanceof Blob) {
-                    return [entry[0], `Blob(${entry[1].type}, ${entry[1].size} bytes)`];
-                }
-                return entry;
-            }));
+            console.log('JSON data:', jsonData);
             
             // Reset button state
             sendButton.disabled = false;
