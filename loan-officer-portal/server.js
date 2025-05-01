@@ -3,6 +3,18 @@ const fs = require('fs');
 const path = require('path');
 
 const server = http.createServer((req, res) => {
+  // --- CORS HEADERS ---
+  res.setHeader('Access-Control-Allow-Origin', 'https://mcascrubber.netlify.app');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle preflight OPTIONS request
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
   // Default to index.html
   let filePath = '.' + req.url;
   if (filePath === './') {
