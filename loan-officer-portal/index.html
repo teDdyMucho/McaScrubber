@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loan Officer Portal - Merchant Cash Advance</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .modal { position: fixed; z-index: 1000; left: 0; top: 0; width: 100vw; height: 100vh; overflow: auto; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: #fff; padding: 20px; border-radius: 8px; min-width: 300px; max-width: 400px; position: relative; }
+        .close { position: absolute; right: 16px; top: 10px; font-size: 28px; cursor: pointer; }
+        .btn.settings { margin-left: 1rem; background: #eee; color: #333; border: 1px solid #ccc; }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -12,6 +18,7 @@
             <h1>Loan Officer Portal</h1>
             <h2>Merchant Cash Advance Specialist</h2>
         </header>
+        <button id="settingsButton" class="btn settings">Settings</button>
         
         <main>
             <section class="upload-section">
@@ -64,5 +71,6 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
     </script>
     <script src="js/script.js"></script>
+    <script src="js/settings.js"></script>
 </body>
-</html>
+

@@ -13,7 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadedImages = [];
     
     // Webhook URL for n8n
-    const webhookUrl = 'https://primary-production-c8d0.up.railway.app/webhook/edbc7b39-04dc-4cc6-a8d0-b47d0c9c853f';
+    const webhookUrl = 'https://primary-production-166e.up.railway.app/webhook-test/75c06d22-e3bb-46b6-a96e-c16980992a38';
+    
+    // Header Authentication credentials
+    const authHeaders = {
+        // Based on the error message, we need to use the Authorization header instead
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJsb2FuLW9mZmljZXItcG9ydGFsIiwiaWF0IjoxNjgyNTk1MzY3fQ.Qz2KhCypSXnVJRv8DuLXbW4ZVeYS7gX5M2jQ8PwT3Rk'
+    };
     
     // Event Listeners
     uploadArea.addEventListener('click', () => fileInput.click());
@@ -226,6 +232,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Prepare data for webhook
         const formData = new FormData();
         
+        // Add AI Prompt from localStorage
+        const aiPrompt = localStorage.getItem('aiPrompt') || '';
+        formData.append('aiPrompt', aiPrompt);
+
         // Add each image to the form data
         uploadedImages.forEach((image, index) => {
             // Convert base64 to blob
@@ -243,17 +253,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // Send data to webhook
+        // Note: When using FormData, don't set Content-Type header as the browser sets it automatically with the boundary
+        // Clone the authHeaders to avoid modifying the original
+        const headers = { ...authHeaders };
+        
         fetch(webhookUrl, {
             method: 'POST',
+            headers: headers,
             body: formData
         })
         .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', [...response.headers.entries()]);
+            
+            // Check if response is ok (status in the range 200-299)
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`HTTP error ${response.status}: ${text}`);
+                });
+            }
+            
             // Check if the response is JSON or text
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
-                return response.json().then(data => ({ isJson: true, data }));
+                return response.json().then(data => {
+                    console.log('Response data (JSON):', data);
+                    return { isJson: true, data };
+                });
             } else {
-                return response.text().then(text => ({ isJson: false, data: text }));
+                return response.text().then(text => {
+                    console.log('Response data (Text):', text);
+                    return { isJson: false, data: text };
+                });
             }
         })
         .then(result => {
@@ -266,8 +297,19 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => {
             // Display error
-            showResponse('Failed to send images to webhook. Please try again.', false);
+            showResponse(`Failed to send images to webhook: ${error.message}`, false);
             console.error('Error sending images to webhook:', error);
+            
+            // Log request details for debugging
+            console.log('Request URL:', webhookUrl);
+            console.log('Request headers:', headers);
+            console.log('FormData entries:', [...formData.entries()].map(entry => {
+                // Don't log the full blob data, just the name and type
+                if (entry[1] instanceof Blob) {
+                    return [entry[0], `Blob(${entry[1].type}, ${entry[1].size} bytes)`];
+                }
+                return entry;
+            }));
             
             // Reset button state
             sendButton.disabled = false;
@@ -293,9 +335,22 @@ document.addEventListener('DOMContentLoaded', () => {
             responseContent.textContent = data;
         }
         
-        // Clear previous response and add new one
+        // Create view button for full-screen mode
+        const viewButton = document.createElement('button');
+        viewButton.className = 'view-btn';
+        viewButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg>';
+        viewButton.title = 'View full screen';
+        viewButton.addEventListener('click', () => openFullScreenView(responseContent.textContent));
+        
+        // Create a wrapper for the response content and view button
+        const responseWrapper = document.createElement('div');
+        responseWrapper.className = 'response-wrapper';
+        
+        // Clear previous response and add new one with the view button
         responseContainer.innerHTML = '';
-        responseContainer.appendChild(responseContent);
+        responseWrapper.appendChild(responseContent);
+        responseWrapper.appendChild(viewButton);
+        responseContainer.appendChild(responseWrapper);
     }
     
     function clearAllImages() {
@@ -316,5 +371,88 @@ document.addEventListener('DOMContentLoaded', () => {
         const hasImages = uploadedImages.length > 0;
         sendButton.disabled = !hasImages;
         clearButton.disabled = !hasImages;
+    }
+    
+    // Function to open full-screen view of text content
+    function openFullScreenView(content) {
+        // Create full-screen overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'fullscreen-overlay';
+        
+        // Create container for content and controls
+        const container = document.createElement('div');
+        container.className = 'fullscreen-container';
+        
+        // Create text display area
+        const textDisplay = document.createElement('pre');
+        textDisplay.className = 'fullscreen-text';
+        textDisplay.textContent = content;
+        
+        // Create controls container
+        const controls = document.createElement('div');
+        controls.className = 'fullscreen-controls';
+        
+        // Create font size controls
+        const decreaseFontBtn = document.createElement('button');
+        decreaseFontBtn.className = 'font-control-btn';
+        decreaseFontBtn.innerHTML = 'A-';
+        decreaseFontBtn.title = 'Decrease font size';
+        
+        const increaseFontBtn = document.createElement('button');
+        increaseFontBtn.className = 'font-control-btn';
+        increaseFontBtn.innerHTML = 'A+';
+        increaseFontBtn.title = 'Increase font size';
+        
+        // Create close button
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'close-fullscreen-btn';
+        closeBtn.innerHTML = '&times;';
+        closeBtn.title = 'Close full screen view';
+        
+        // Current font size (in pixels)
+        let currentFontSize = 14;
+        
+        // Apply initial font size
+        textDisplay.style.fontSize = `${currentFontSize}px`;
+        
+        // Add event listeners for font size controls
+        decreaseFontBtn.addEventListener('click', () => {
+            if (currentFontSize > 8) {
+                currentFontSize -= 2;
+                textDisplay.style.fontSize = `${currentFontSize}px`;
+            }
+        });
+        
+        increaseFontBtn.addEventListener('click', () => {
+            if (currentFontSize < 36) {
+                currentFontSize += 2;
+                textDisplay.style.fontSize = `${currentFontSize}px`;
+            }
+        });
+        
+        // Add event listener for close button
+        closeBtn.addEventListener('click', () => {
+            document.body.removeChild(overlay);
+        });
+        
+        // Add escape key listener to close the overlay
+        const escKeyHandler = (e) => {
+            if (e.key === 'Escape') {
+                document.body.removeChild(overlay);
+                document.removeEventListener('keydown', escKeyHandler);
+            }
+        };
+        document.addEventListener('keydown', escKeyHandler);
+        
+        // Assemble the UI
+        controls.appendChild(decreaseFontBtn);
+        controls.appendChild(increaseFontBtn);
+        controls.appendChild(closeBtn);
+        
+        container.appendChild(controls);
+        container.appendChild(textDisplay);
+        
+        overlay.appendChild(container);
+        document.body.appendChild(overlay);
     }
 });
