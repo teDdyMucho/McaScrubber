@@ -13,10 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadedImages = [];
     
     // Webhook URL for n8n
-    const originalWebhookUrl = 'https://primary-production-166e.up.railway.app/webhook-test/75c06d22-e3bb-46b6-a96e-c16980992a38';
-    // Use a CORS proxy to bypass CORS restrictions
-    const corsProxyUrl = 'https://corsproxy.io/?';
-    const webhookUrl = corsProxyUrl + encodeURIComponent(originalWebhookUrl);
+    const webhookUrl = 'https://primary-production-166e.up.railway.app/webhook-test/75c06d22-e3bb-46b6-a96e-c16980992a38';
     
     // Header Authentication credentials
     const authHeaders = {
@@ -232,41 +229,32 @@ document.addEventListener('DOMContentLoaded', () => {
         sendButton.disabled = true;
         sendButton.textContent = 'Sending...';
         
-        // Prepare data for webhook
-        const formData = new FormData();
-        
-        // Add AI Prompt from localStorage
+        // Get AI Prompt from localStorage
         const aiPrompt = localStorage.getItem('aiPrompt') || '';
-        formData.append('aiPrompt', aiPrompt);
-
-        // Add each image to the form data
-        uploadedImages.forEach((image, index) => {
-            // Convert base64 to blob
-            const byteString = atob(image.data.split(',')[1]);
-            const mimeType = image.data.split(',')[0].split(':')[1].split(';')[0];
-            const ab = new ArrayBuffer(byteString.length);
-            const ia = new Uint8Array(ab);
-            
-            for (let i = 0; i < byteString.length; i++) {
-                ia[i] = byteString.charCodeAt(i);
-            }
-            
-            const blob = new Blob([ab], { type: mimeType });
-            formData.append(`image_${index}`, blob, image.name || `screenshot_${index}.png`);
-        });
         
-        // Send data to webhook
-        // Note: When using FormData, don't set Content-Type header as the browser sets it automatically with the boundary
-        // Clone the authHeaders to avoid modifying the original
-        const headers = { ...authHeaders };
+        // Prepare JSON data instead of FormData
+        const jsonData = {
+            aiPrompt: aiPrompt,
+            images: uploadedImages.map((image, index) => ({
+                name: image.name || `screenshot_${index}.png`,
+                data: image.data,  // Already base64 encoded
+                type: image.data.split(',')[0].split(':')[1].split(';')[0]
+            }))
+        };
         
-        // Add mode: 'cors' and credentials: 'omit' for CORS requests
+        // Set up headers for JSON
+        const headers = { 
+            ...authHeaders,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        };
+        
+        // Send JSON data to webhook
         fetch(webhookUrl, {
             method: 'POST',
             headers: headers,
-            body: formData,
-            mode: 'cors',
-            credentials: 'omit'
+            body: JSON.stringify(jsonData),
+            mode: 'cors'
         })
         .then(response => {
             console.log('Response status:', response.status);
